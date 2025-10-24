@@ -1,0 +1,110 @@
+<template>
+    <lightning-card title="Employee Onboarding Dashboard" icon-name="standard:employee">
+
+        <div class="slds-p-around_medium">
+
+            <!-- Top Statistics -->
+            <div class="dashboard-summary slds-m-bottom_medium">
+                <lightning-card title="Onboarding Summary">
+                    <div class="summary-content">
+                        <div>
+                            <p class="summary-title">Total Employees</p>
+                            <p class="summary-value">{totalEmployees}</p>
+                        </div>
+                        <div>
+                            <p class="summary-title">Overall Completion</p>
+                            <p class="summary-value">{overallCompletion}%</p>
+                        </div>
+                    </div>
+                </lightning-card>
+            </div>
+
+            <!-- Loader -->
+            <template if:true={loading}>
+                <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+            </template>
+
+            <!-- Bulk Onboard Button -->
+            <div class="slds-m-bottom_medium slds-align_absolute-center">
+                <lightning-button 
+                    variant="brand" 
+                    label="Bulk Onboard (Top 5)" 
+                    onclick={handleBulkOnboard}>
+                </lightning-button>
+            </div>
+
+            <!-- Employee Grid -->
+            <div class="employee-grid">
+                <template if:true={employees}>
+                    <template for:each={employees} for:item="emp">
+                        <div key={emp.empId} class="employee-card">
+                            <lightning-icon 
+                                icon-name="utility:user"
+                                size="large"
+                                alternative-text="Employee"
+                                class="employee-icon">
+                            </lightning-icon>
+
+                            <p class="employee-name">{emp.Name}</p>
+                            <p class="employee-role">{emp.Department__c}</p>
+
+                            <div class="progress-container">
+                                <div class="progress-bar"></div>
+                            </div>
+                            <p class="progress-label">Progress: {emp.completionPctFormatted}%</p>
+
+                            <div class="employee-buttons">
+                                <lightning-button 
+                                    variant="brand-outline" 
+                                    label="Background Check" 
+                                    data-id={emp.empId}
+                                    onclick={handleTriggerBgCheck}>
+                                </lightning-button>
+
+                                <lightning-button 
+                                    variant="success" 
+                                    label="Tasks"
+                                    data-id={emp.empId}
+                                    onclick={handleShowTasks}>
+                                </lightning-button>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+
+                <template if:false={employees}>
+                    <p class="slds-text-color_weak slds-align_absolute-center">No employees found.</p>
+                </template>
+            </div>
+
+            <!-- Employee Details -->
+            <template if:true={selectedEmployee}>
+                <div class="employee-details">
+                    <lightning-card title="Employee Details">
+                        <div class="slds-p-around_medium">
+                            <p><b>Name:</b> {selectedEmployee.Name}</p>
+                            <p><b>Email:</b> {selectedEmployee.Email__c}</p>
+                            <p><b>Start Date:</b> {selectedEmployee.Start_Date__c}</p>
+                            <p><b>Onboarding Status:</b> {selectedEmployee.Onboarding_Status__c}</p>
+                            <p><b>Background Check Status:</b> {selectedEmployee.Background_Status__c}</p>
+                            <p><b>Completion:</b> {selectedEmployee.completionPctFormatted}%</p>
+                        </div>
+                    </lightning-card>
+                </div>
+            </template>
+
+            <!-- Tasks Section -->
+            <template if:true={selectedEmployeeTasks}>
+                <lightning-card title="Onboarding Tasks for {selectedEmployee.Name}">
+                    <lightning-datatable
+                        key-field="Id"
+                        data={selectedEmployeeTasks}
+                        columns={taskColumns}
+                        onrowaction={handleRowAction}>
+                    </lightning-datatable>
+                </lightning-card>
+            </template>
+
+        </div>
+    </lightning-card>
+</template>
